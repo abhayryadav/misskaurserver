@@ -233,6 +233,34 @@ app.get('/fetch-main', async (req, res) => {
         res.status(500).json({ error: 'Server error while fetching main record', details: error.message });
     }
 });
+// fetch by location
+// API 6: Fetch file by fileLocation
+app.get('/fetch-by-location', async (req, res) => {
+    try {
+        const fileLocation = req.query.fileLocation;
+        console.log('Received file location:', fileLocation);
+        if (!fileLocation) {
+            console.log('File location not provided');
+            return res.status(400).json({ error: 'File location not provided' });
+        }
+
+        const absolutePath = path.join(__dirname, fileLocation);
+        console.log('Absolute path:', absolutePath);
+        if (!fs.existsSync(absolutePath)) {
+            console.log('File does not exist at:', absolutePath);
+            return res.status(404).json({ error: 'File not found on server' });
+        }
+
+        // Send the file
+        console.log('Sending file:', absolutePath);
+        res.download(absolutePath, `attendance-${moment().format('YYYY-MM-DD')}.xlsx`);
+    } catch (error) {
+        console.error('Fetch by location error:', error);
+        res.status(500).json({ error: 'Server error while fetching file by location', details: error.message });
+    }
+});
+
+
 
 // Initialize server
 async function startServer() {
