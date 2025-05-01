@@ -76,7 +76,7 @@ app.post('/startsession', (req, res) => {
         console.log('Received data:', data);
         faculty_name = data.faculty_name;
         venue_name = data.venue_name;
-        class_name = data.class_name;
+        class_name = data.subject_code;
         btnState=4;
         console.log('Button state toggled to:', btnState);
         res.status(200).json({ msg: 'Button state toggled successfully', state: btnState });
