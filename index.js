@@ -79,10 +79,10 @@ app.post('/startsession', (req, res) => {
         class_name = data.subject_code;
         btnState=4;
         console.log('Button state toggled to:', btnState);
-        res.status(200).json({ msg: 'Button state toggled successfully', state: btnState });
+        res.status(200)
     } catch (error) {
         console.error('Toggle state error:', error);
-        res.status(500).json({ error: 'Server error while toggling state' });
+        res.status(500)
     }
 });
 
@@ -235,7 +235,13 @@ app.get('/fetch-main', async (req, res) => {
 });
 // fetch by location
 // API 6: Fetch file by fileLocation
+let downloadInProgress = false;
 app.get('/fetch-by-location', async (req, res) => {
+    if (downloadInProgress) {
+        console.log('Download already in progress.');
+        return res.status(429).json({ error: 'Download already in progress. Try again later.' });
+    }
+    downloadInProgress = true;
     try {
         const fileLocation = req.query.fileLocation;
         console.log('Received file location:', fileLocation);
@@ -253,10 +259,13 @@ app.get('/fetch-by-location', async (req, res) => {
 
         // Send the file
         console.log('Sending file:', absolutePath);
-        res.download(absolutePath, `attendance-${moment().format('YYYY-MM-DD')}.xlsx`);
+        res.download(absolutePath, `attendance-${moment().format('YYYY-MM-DD')}.xlsx`, () => {
+            downloadInProgress = false; // reset after done
+        });
     } catch (error) {
-        console.error('Fetch by location error:', error);
-        res.status(500).json({ error: 'Server error while fetching file by location', details: error.message });
+        downloadInProgress = false;
+        console.error(error);
+        res.status(500).json({ error: 'Server error' });
     }
 });
 
